@@ -19,20 +19,52 @@ def send_mail(send_to, msg):
         print(' > Logging in ... ')
         server.login(FROM_ADDR, PW)
         print(' > Sending message ... ')
-        server.sendmail(FROM_ADDR, send_to, msg)
+        server.sendmail(FROM_ADDR, send_to, msg.as_string())
 
 
 def build_message():
-    'Builds an email message'
+    'Builds a MIME multipart message'
     # message data
     to_addr = input('Who would you like to send an email to? > ')
-    message = """\
-    Subject: Testing...
+    
+    # set up message object
+    message = MIMEMultipart('alternative')
+    message['Subject'] = 'Testing ... '
+    message['From'] = FROM_ADDR
+    message['To'] = to_addr
 
+    # define plain text and html versions of the message
+    plain = '''\
     Hello, world!
 
-    This message is sent from some Python code.
-    - Jaxon"""
+    I'm testing out sending emails automatically. Don't mind lil' ol' me!
+
+    - Jaxon
+    '''
+    html = '''\
+    <html>
+        <body style="width: 80%; margin: 0 auto; border: 1px solid black; border-radius: 18px;">
+            <h1 style="text-align: center; width: 100%; margin: 0 auto 0.5rem auto; background: steelblue; color: white; border-radius: 18px 18px 0 0;">
+            Hello, world!
+            </h1>
+            <i style="color: tomato; margin: 0.5rem 1rem; font-size: 1.2rem; text-align: center;">
+            I'm testing out sending emails automatically. Don't mind lil' ol' me!
+            </i>
+            <br/>
+            <h2 style="margin: 0.5rem 1rem;"> - Jaxon</h3>
+        </body>
+    </html>
+    '''
+
+    # convert to MIME objects
+    as_txt = MIMEText(plain, 'plain')
+    as_html = MIMEText(html, 'html')
+
+    # attach to message object
+    message.attach(as_txt)
+    message.attach(as_html)
+    # the email client will try to render the last part first, in this case the html version
+
     return to_addr, message
 
 
